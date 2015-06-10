@@ -87,6 +87,7 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
         this.addView(mVideoView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         this.addView(mThumbImageView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mThumbImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         if (mThumbnailBitmap != null) {
             mThumbImageView.setImageBitmap(mThumbnailBitmap);
             mThumbImageView.setVisibility(VISIBLE);
@@ -262,7 +263,8 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
      */
     private void start() {
         if (mAdapter == null) {
-            throw new IllegalStateException("Please set video or video adapter before start");
+            Toast.makeText(getContext(), getContext().getString(R.string.stvv_no_video_toast), Toast.LENGTH_SHORT).show();
+            return;
         }
         if (Build.VERSION.SDK_INT >= 17) {
             mVideoView.setOnInfoListener(new MediaPlayer.OnInfoListener() {
@@ -270,7 +272,7 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
                 @Override
                 public boolean onInfo(MediaPlayer mp, int what, int extra) {
                     if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-                        mVideoView.setVisibility(View.GONE);
+                        mThumbImageView.setVisibility(View.GONE);
                     }
                     mVideoView.setOnInfoListener(null);
                     return true;
@@ -280,11 +282,12 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
             mThumbImageView.setVisibility(View.GONE);
         }
         mControlButton.setVisibility(INVISIBLE);
-
+        playVideo();
     }
 
     private void playVideo() {
-        if (currentVideoIndex++ < mAdapter.getCount()) {
+        if (currentVideoIndex < mAdapter.getCount() - 1) {
+            currentVideoIndex++;
             String path = mAdapter.getVideoPath(currentVideoIndex);
             mVideoView.setVideoPath(path);
             mVideoView.setOnCompletionListener(this);
