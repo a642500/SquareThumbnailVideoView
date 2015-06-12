@@ -11,16 +11,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.SurfaceHolder;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
+
+import java.util.Calendar;
 
 /**
  * Created by yyz on 6/9/15.
  */
-public final class SquareThumbnailVideoView extends FrameLayout implements View.OnClickListener, MediaPlayer.OnCompletionListener {
+public final class SquareThumbnailVideoView extends FrameLayout implements View.OnClickListener, MediaPlayer.OnCompletionListener, View.OnTouchListener {
     private static final String TAG = "SquareThumbnailVideoV";
 
     public SquareThumbnailVideoView(Context context, AttributeSet attrs) {
@@ -62,12 +61,9 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
     private Bitmap mThumbnailBitmap = null;
 
     private Drawable mPlayButtonDrawable = getResources().getDrawable(R.drawable.stvv_defalut_play_button);
-    private boolean isFullFrameControl = true;
 
     private void init(AttributeSet attrs, int defStyleAttr) {
         final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.stvv_SquareThumbnailVideoView, defStyleAttr, 0);
-
-        isFullFrameControl = a.getBoolean(R.styleable.stvv_SquareThumbnailVideoView_stvv_isPlayButtonFullFrameControl, isFullFrameControl);
 
         if (a.hasValue(R.styleable.stvv_SquareThumbnailVideoView_stvv_playButtonImage)) {
             mPlayButtonDrawable = a.getDrawable(R.styleable.stvv_SquareThumbnailVideoView_stvv_playButtonImage);
@@ -101,12 +97,7 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
         if (Build.VERSION.SDK_INT > 16) mControlButton.setBackground(null);
         else mControlButton.setBackgroundResource(0);
 
-        LayoutParams buttonParams;
-        if (isFullFrameControl) {
-            buttonParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        } else {
-            buttonParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
+        LayoutParams buttonParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         buttonParams.gravity = Gravity.CENTER;
         this.addView(mControlButton, buttonParams);
 
@@ -114,7 +105,7 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
     }
 
     /**
-     * set res id of the thumbnail
+     * set thumbnail bitmap
      */
     public void setThumbnailBitmap(Bitmap bitmap) {
         if (mThumbImageView == null) {
@@ -282,11 +273,15 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
             mThumbImageView.setVisibility(View.GONE);
         }
         mControlButton.setVisibility(INVISIBLE);
+        mVideoView.setOnTouchListener(this);
         playVideo();
     }
 
     private void playVideo() {
-        if (currentVideoIndex < mAdapter.getCount() - 1) {
+        if (isPause) {
+            mVideoView.start();// resume
+            isPause = false;
+        } else if (currentVideoIndex < mAdapter.getCount() - 1) {
             currentVideoIndex++;
             String path = mAdapter.getVideoPath(currentVideoIndex);
             mVideoView.setVideoPath(path);
@@ -306,5 +301,30 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
         playVideo();
     }
 
+    private long startClickTime;
+    private static final int MAX_CLICK_DURATION = 200;
+    private boolean isPause = false;
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                startClickTime = Calendar.getInstance().getTimeInMillis();
+                return true;
+            case MotionEvent.ACTION_UP:
+                long clickDuration = Calendar.getInstance().getTimeInMillis() - startClickTime;
+                // if near end, async pause will actually pause video when play end, and will cause resume fail
+                boolean notNearingEnd = (mVideoView.getDuration() == -1 // only media may have no duration
+                        && mVideoView.getCurrentPosition() < 800) || (mVideoView.getCurrentPosition() + 400 < mVideoView.getDuration());
+                if (clickDuration < MAX_CLICK_DURATION && mVideoView.isPlaying() && notNearingEnd) {
+                    mVideoView.setOnTouchListener(null);
+                    mVideoView.pause();
+                    isPause = true;
+                    mControlButton.setVisibility(View.VISIBLE);
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
 }
