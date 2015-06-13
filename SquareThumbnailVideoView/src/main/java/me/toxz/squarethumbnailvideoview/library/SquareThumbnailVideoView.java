@@ -9,6 +9,8 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.*;
@@ -84,9 +86,10 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
 
         this.addView(mThumbImageView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mThumbImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
         if (mThumbnailBitmap != null) {
-            mThumbImageView.setImageBitmap(mThumbnailBitmap);
-            mThumbImageView.setVisibility(VISIBLE);
+            // mean pending set bitmap
+            setThumbnailBitmap(mThumbnailBitmap);
         } else {
             mThumbImageView.setVisibility(INVISIBLE);
         }
@@ -107,13 +110,18 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
     /**
      * set thumbnail bitmap
      */
-    public void setThumbnailBitmap(Bitmap bitmap) {
+    public void setThumbnailBitmap(@Nullable Bitmap bitmap) {
+        // if called before view created, store it and set later
         if (mThumbImageView == null) {
             mThumbnailBitmap = bitmap;
         } else {
+            // view created, set it now
             mThumbnailBitmap = bitmap;
-            mThumbImageView.setImageBitmap(bitmap);
-            mThumbImageView.setVisibility(VISIBLE);
+            if (mAdapter == null || !mAdapter.setThumbnailImage(mThumbImageView, bitmap)) {
+                // if set not adapter or setThumbnailImage return false
+                mThumbImageView.setImageBitmap(bitmap);
+                mThumbImageView.setVisibility(bitmap != null ? VISIBLE : INVISIBLE);
+            }
         }
     }
 
@@ -155,7 +163,7 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
      *
      * @param path
      */
-    public void setVideoPath(final String path) {
+    public void setVideoPath(@NonNull final String path) {
         mAdapter = new VideoAdapter<String>() {
 
             @Override
@@ -182,13 +190,20 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
             public boolean isEmpty() {
                 return false;
             }
+
+            @Override
+            public boolean setThumbnailImage(@NonNull ImageView thumbnailImageView, @Nullable Bitmap bitmap) {
+                return false;
+            }
         };
     }
 
     private VideoAdapter mAdapter;
 
-    public void setVideoAdapter(VideoAdapter adapter) {
+    public void setVideoAdapter(@NonNull VideoAdapter adapter) {
         mAdapter = adapter;
+        // set image again
+        setThumbnailBitmap(mThumbnailBitmap);
     }
 
     public void resume() {

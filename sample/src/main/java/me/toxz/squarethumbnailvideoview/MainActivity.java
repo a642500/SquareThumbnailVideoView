@@ -1,14 +1,17 @@
 package me.toxz.squarethumbnailvideoview;
 
 import android.content.res.AssetManager;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import me.toxz.squarethumbnailvideoview.library.BaseVideoAdapter;
 import me.toxz.squarethumbnailvideoview.library.SquareThumbnailVideoView;
-import me.toxz.squarethumbnailvideoview.library.VideoAdapter;
 
 import java.io.*;
 
@@ -20,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SquareThumbnailVideoView squareThumbnailVideoView = (SquareThumbnailVideoView) findViewById(R.id.squareThumbnailVideoView);
-        squareThumbnailVideoView.setThumbnailBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
 
         File dir = getExternalFilesDir("video");
         if (!dir.exists()) {
@@ -30,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
             copyAssets(dir);
         final File files[] = dir.listFiles();
 
-        squareThumbnailVideoView.setVideoAdapter(new VideoAdapter() {
+        squareThumbnailVideoView.setVideoAdapter(new BaseVideoAdapter() {
             @Override
             public int getCount() {
                 return files.length;
@@ -41,10 +43,6 @@ public class MainActivity extends AppCompatActivity {
                 return files[position];
             }
 
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
 
             @Override
             public String getVideoPath(int position) {
@@ -54,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean isEmpty() {
                 return files.length > 0;
+            }
+
+            @Override
+            public boolean setThumbnailImage(@NonNull ImageView thumbnailImageView, @Nullable Bitmap bitmap) {
+                thumbnailImageView.setImageResource(R.mipmap.ic_launcher);
+                return true;
             }
         });
     }
