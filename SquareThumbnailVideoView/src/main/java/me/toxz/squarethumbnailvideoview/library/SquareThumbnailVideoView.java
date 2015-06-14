@@ -84,16 +84,16 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
 
         this.addView(mVideoView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        this.addView(mThumbImageView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mThumbImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         if (mThumbnailBitmap != null) {
             // mean pending set bitmap
+            Log.d("initView", "do pended bitmap");
             setThumbnailBitmap(mThumbnailBitmap);
-        } else {
-            mThumbImageView.setVisibility(INVISIBLE);
+            mThumbImageView.setVisibility(VISIBLE);
         }
 
+        this.addView(mThumbImageView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mThumbImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         mControlButton.setImageDrawable(mPlayButtonDrawable);
         mControlButton.setScaleType(ImageView.ScaleType.CENTER);
@@ -114,14 +114,18 @@ public final class SquareThumbnailVideoView extends FrameLayout implements View.
         // if called before view created, store it and set later
         if (mThumbImageView == null) {
             mThumbnailBitmap = bitmap;
+            Log.d("setThumbnailBitmap", "view not created, pending set");
         } else {
             // view created, set it now
             mThumbnailBitmap = bitmap;
+            Log.d("setThumbnailBitmap", "view created, set.");
             if (mAdapter == null || !mAdapter.setThumbnailImage(mThumbImageView, bitmap)) {
                 // if set not adapter or setThumbnailImage return false
+                Log.d("setThumbnailBitmap", "not override targeted method.");
                 mThumbImageView.setImageBitmap(bitmap);
-                mThumbImageView.setVisibility(bitmap != null ? VISIBLE : INVISIBLE);
+                mThumbImageView.setVisibility(VISIBLE);
             }
+
         }
     }
 
