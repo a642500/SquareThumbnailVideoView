@@ -1,8 +1,6 @@
 package me.toxz.squarethumbnailvideoview.library;
 
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 /**
@@ -20,7 +18,7 @@ public abstract class BaseVideoAdapter implements VideoAdapter {
     }
 
     @Override
-    public boolean setThumbnailImage(@NonNull ImageView thumbnailImageView, @Nullable Bitmap bitmap) {
+    public boolean setThumbnailImage(ImageView thumbnailImageView, Bitmap bitmap) {
         return false;
     }
 }

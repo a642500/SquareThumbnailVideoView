@@ -1,8 +1,6 @@
 package me.toxz.squarethumbnailvideoview.library;
 
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 /**
@@ -57,5 +55,5 @@ public interface VideoAdapter<T> {
      * @param bitmap             bitmap set by {@link SquareThumbnailVideoView#setThumbnailBitmap(Bitmap)}, null if you haven't set it.
      * @return false if you didn't fill thumbnail image
      */
-    boolean setThumbnailImage(@NonNull ImageView thumbnailImageView, @Nullable Bitmap bitmap);
+    boolean setThumbnailImage(ImageView thumbnailImageView, Bitmap bitmap);
 }

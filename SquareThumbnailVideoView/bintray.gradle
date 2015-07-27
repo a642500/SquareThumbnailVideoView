@@ -10,10 +10,14 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
+//androidJar = new File(System.getenv('ANDROID_HOME'), '/platforms/android-22/android.jar')
+
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += configurations.compile
 }
+//'opt/android-sdk/platforms/android-22/android.jar'
+
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
@@ -71,7 +75,7 @@ publishing {
 
 bintray {
     user = BINTRAY_USER
-    key = ''
+    key = 'b2b7a8fdf26e4f7b530ba3fdc9be7522e8e16778'
 
     configurations = ['archives']
     publications = ['mavenJava']

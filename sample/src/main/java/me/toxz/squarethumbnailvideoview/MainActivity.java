@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean setThumbnailImage(@NonNull ImageView thumbnailImageView, @Nullable Bitmap bitmap) {
                 Log.d("adapter", "set bitmap by adapter");
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+                bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
                 thumbnailImageView.setImageBitmap(bitmap);
                 thumbnailImageView.setVisibility(View.VISIBLE);
 
